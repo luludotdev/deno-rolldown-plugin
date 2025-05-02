@@ -143,8 +143,8 @@ export async function resolveViteSpecifier(
   id: string,
   cache: Map<string, DenoResolveResult>,
   root: string,
-  importer?: string
-) {
+  importer?: string | DenoSpecifier
+): Promise<string | null | undefined | DenoSpecifier> {
   // Resolve import map
   if (!id.startsWith(".") && !id.startsWith("/")) {
     try {
@@ -155,7 +155,7 @@ export async function resolveViteSpecifier(
   }
 
   if (importer && isDenoSpecifier(importer)) {
-    const { resolved: parent } = parseDenoSpecifier(importer);
+    const { resolved: parent } = importer;
 
     const cached = cache.get(parent);
     if (cached === undefined) return;
@@ -192,33 +192,28 @@ export async function resolveViteSpecifier(
   }
 
   // We must load it
-  return toDenoSpecifier(resolved.loader, id, resolved.id);
+  return {
+    loader: resolved.loader,
+    id,
+    resolved: resolved.id,
+  } satisfies DenoSpecifier;
 }
 
-export type DenoSpecifierName = string & { __brand: "deno" };
-
-export function isDenoSpecifier(str: string): str is DenoSpecifierName {
-  return str.startsWith("\0deno");
-}
-
-export function toDenoSpecifier(
-  loader: DenoMediaType,
-  id: string,
-  resolved: string
-): DenoSpecifierName {
-  return `\0deno::${loader}::${id}::${resolved}` as DenoSpecifierName;
-}
-
-export function parseDenoSpecifier(spec: DenoSpecifierName): {
+interface DenoSpecifier {
   loader: DenoMediaType;
   id: string;
   resolved: string;
-} {
-  const [_, loader, id, resolved] = spec.split("::") as [
-    string,
-    string,
-    DenoMediaType,
-    string
-  ];
-  return { loader: loader as DenoMediaType, id, resolved };
+}
+
+export function isDenoSpecifier(o: unknown): o is DenoSpecifier {
+  if (typeof o !== "object" || o === null) return false;
+
+  return (
+    "loader" in o &&
+    typeof o.loader === "string" &&
+    "id" in o &&
+    typeof o.id === "string" &&
+    "resolved" in o &&
+    typeof o.resolved === "string"
+  );
 }

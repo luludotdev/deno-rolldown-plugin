@@ -2,11 +2,7 @@ import * as fsp from "node:fs/promises";
 import process from "node:process";
 import type { Plugin } from "rolldown";
 import type { DenoMediaType, DenoResolveResult } from "./resolver.ts";
-import {
-  isDenoSpecifier,
-  parseDenoSpecifier,
-  resolveViteSpecifier,
-} from "./resolver.ts";
+import { isDenoSpecifier, resolveViteSpecifier } from "./resolver.ts";
 
 export function denoPlugin(cache: Map<string, DenoResolveResult>): Plugin {
   let root = process.cwd();
@@ -21,12 +17,24 @@ export function denoPlugin(cache: Map<string, DenoResolveResult>): Plugin {
       // The "pre"-resolve plugin already resolved it
       if (isDenoSpecifier(id)) return;
 
-      return await resolveViteSpecifier(id, cache, root, importer);
+      const parentInfo = importer ? this.getModuleInfo(importer) : undefined;
+      const parent = isDenoSpecifier(parentInfo?.meta.deno)
+        ? parentInfo.meta.deno
+        : importer;
+
+      const resolved = await resolveViteSpecifier(id, cache, root, parent);
+      if (typeof resolved !== "object" || resolved === null) {
+        return resolved;
+      }
+
+      return { id: resolved.id, meta: { deno: resolved } };
     },
     async load(id) {
-      if (!isDenoSpecifier(id)) return;
+      const info = this.getModuleInfo(id);
+      const deno = info?.meta.deno;
 
-      const { loader, resolved } = parseDenoSpecifier(id);
+      if (!isDenoSpecifier(deno)) return;
+      const { loader, resolved } = deno;
 
       const moduleType = mediaTypeToLoader(loader);
       const content = await fsp.readFile(resolved, "utf-8");

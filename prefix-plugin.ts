@@ -25,7 +25,18 @@ export function denoPrefixPlugin(
           const result = await this.resolve(actual);
           return result ?? actual;
         } else if (id.startsWith("http:") || id.startsWith("https:")) {
-          return await resolveViteSpecifier(id, cache, root, importer);
+          const resolved = await resolveViteSpecifier(
+            id,
+            cache,
+            root,
+            importer
+          );
+
+          if (typeof resolved !== "object" || resolved === null) {
+            return resolved;
+          }
+
+          return { id: resolved.id, meta: { deno: resolved } };
         }
       },
     },
