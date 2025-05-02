@@ -6,14 +6,14 @@ import { resolveDeno, resolveViteSpecifier } from "./resolver.ts";
 export function denoPrefixPlugin(
   cache: Map<string, DenoResolveResult>
 ): Plugin {
-  // TODO: translate this
   let root = process.cwd();
 
   return {
     name: "deno:prefix",
-    // configResolved(config) {
-    //   root = config.root;
-    // },
+    buildStart(options) {
+      const cwd = options.cwd;
+      if (cwd) root = cwd;
+    },
     resolveId: {
       order: "pre",
       async handler(id, importer) {

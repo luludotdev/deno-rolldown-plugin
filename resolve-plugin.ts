@@ -9,14 +9,14 @@ import {
 } from "./resolver.ts";
 
 export function denoPlugin(cache: Map<string, DenoResolveResult>): Plugin {
-  // TODO: translate this
   let root = process.cwd();
 
   return {
     name: "deno",
-    // configResolved(config) {
-    //   root = config.root;
-    // },
+    buildStart(options) {
+      const cwd = options.cwd;
+      if (cwd) root = cwd;
+    },
     async resolveId(id, importer) {
       // The "pre"-resolve plugin already resolved it
       if (isDenoSpecifier(id)) return;
