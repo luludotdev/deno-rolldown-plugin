@@ -3,5 +3,8 @@
   "version": "0.1.0",
   "exports": {
     ".": "./mod.ts"
+  },
+  "imports": {
+    "rolldown": "npm:rolldown@^1.0.0-beta.8"
   }
 }
