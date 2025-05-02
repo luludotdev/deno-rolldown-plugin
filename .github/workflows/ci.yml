@@ -1,0 +1,20 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    if: contains(github.ref, 'refs/tags/') == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run checks
+        run: deno check mod.ts
+      - name: Lint codebase
+        run: deno lint
+      - name: Check formatting
+        run: deno fmt --check
