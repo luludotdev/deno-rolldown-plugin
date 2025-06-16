@@ -1,8 +1,8 @@
 import type { Loader } from "@deno/loader";
-import { ResolutionMode, Workspace, MediaType } from "@deno/loader";
+import { MediaType, ResolutionMode, Workspace } from "@deno/loader";
 import * as path from "@std/path";
 import { isBuiltin } from "node:module";
-import type { Plugin, ModuleType } from "rolldown";
+import type { ModuleType, Plugin } from "rolldown";
 
 export interface DenoPluginOptions {
   /** Show debugging logs */
@@ -53,10 +53,9 @@ export function denoPlugin(options: DenoPluginOptions = {}): Plugin {
         return { id, external: true };
       }
 
-      const kind =
-        opts.kind === "require-call"
-          ? ResolutionMode.Require
-          : ResolutionMode.Import;
+      const kind = opts.kind === "require-call"
+        ? ResolutionMode.Require
+        : ResolutionMode.Import;
 
       const res = loader.resolve(id, importer, kind);
       const resolved = res.startsWith("file:") ? path.fromFileUrl(res) : res;
@@ -66,13 +65,12 @@ export function denoPlugin(options: DenoPluginOptions = {}): Plugin {
       };
     },
     async load(id) {
-      const url =
-        id.startsWith("http:") ||
-        id.startsWith("https:") ||
-        id.startsWith("npm:") ||
-        id.startsWith("jsr:")
-          ? id
-          : path.toFileUrl(id).toString();
+      const url = id.startsWith("http:") ||
+          id.startsWith("https:") ||
+          id.startsWith("npm:") ||
+          id.startsWith("jsr:")
+        ? id
+        : path.toFileUrl(id).toString();
 
       const res = await loader.load(url);
       if (res.kind === "external") {
