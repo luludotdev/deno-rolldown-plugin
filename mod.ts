@@ -4,19 +4,24 @@ import * as path from "@std/path";
 import { isBuiltin } from "node:module";
 import type { ModuleType, Plugin } from "rolldown";
 
+/**
+ * Options to configure plugin behavior
+ */
 export interface DenoPluginOptions {
   /** Show debugging logs */
   debug?: boolean;
-  /** Use this path to a `deno.json` instead of auto-discovering it */
+  /** Use this path to a `deno.json` instead of auto-discovering it. */
   configPath?: string;
   /** Don't transpile files when loading them */
   noTranspile?: boolean;
-  /** Keep JSX as is, instead of transpiling it according to compilerOptions */
+  /** Keep JSX as is, instead of transpiling it according to compilerOptions. */
   preserveJsx?: boolean;
 }
 
 /**
  * Create an instance of the Deno plugin for rolldown
+ *
+ * @param options Plugin options
  */
 export function denoPlugin(options: DenoPluginOptions = {}): Plugin {
   let workspace: Workspace;
