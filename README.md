@@ -14,3 +14,19 @@ supports:
 - `npm:` specifier
 - `jsr:` specifier
 - `http:` and `https:` specifiers
+
+## Usage
+
+1. Install this package
+2. Import it and add to the `rolldown` config
+
+```ts
+import * as rolldown from "rolldown";
+import { denoPlugin } from "@lulu/deno-rolldown-plugin";
+
+await rolldown.build({
+  input: ["./main.ts"],
+  output: { file: "./main.bundle.js" },
+  plugins: [denoPlugin()],
+});
+```
